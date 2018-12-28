@@ -7,19 +7,14 @@ print(SNAKE_BLOCK_RADIUS)
 class SnakeBlock:
     empCount = 0
      # 位置坐标与当前速度
-    def __init__(self, xx, yy,vxx,vyy):
-        self.x = xx
-        self.y = yy
-        self.vx = vxx
-        self.vy = vyy
+    def __init__(self, position,velocity):
+        self.position = position
+        self.velocity = velocity
 
-    def SetVelocity(self,vxx,vyy):
-        self.x = vxx
-        self.y = vyy
+    def SetVelocity(self,velocity):
+        self.velocity = velocity
 
-    def GetVelocity(self):
-        return {self.vxx,self.vyy}
 
-    def GetPosition(self):
-        return {self.x,self.y}
+    def SetPosition(self,position):
+        self.position = position
 
