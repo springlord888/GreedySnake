@@ -1,9 +1,6 @@
 # SnakeBlock
 from GlobalDef import *
 
-print(SNAKE_BLOCK_RADIUS)
-
-
 class SnakeBlock:
     empCount = 0
      # 位置坐标与当前速度
