@@ -17,12 +17,16 @@ rect_y = 50
 rect_change_x = 5
 rect_change_y = 5
 
+SnakeHeadBlockVelocity = Velocity(SNAKE_VELOCITY,0) #头部出事速度向右
+
+# 初始化数据
 SnakeBlockList = []
 for i in range(10):
-    position = Position(20+(i*SNAKE_BLOCK_RADIUS),20)
-    velocity = Velocity(0,0)
-    tempBlcok = SnakeBlock(position,velocity)
+    position = Position(220-(i*SNAKE_BLOCK_RADIUS),20)
+    tempBlcok = SnakeBlock(position,SnakeHeadBlockVelocity)
     SnakeBlockList.append(tempBlcok)
+
+
 
 pygame.init()
 
@@ -44,9 +48,25 @@ while not done:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             done = True
+        # User let up on a key
+        elif event.type == pygame.KEYUP:
+            # If it is an arrow key, reset vector back to zero
+            if event.key == pygame.K_LEFT:
+                SnakeHeadBlockVelocity = Velocity(-SNAKE_VELOCITY, 0)
+            elif event.key == pygame.K_RIGHT:
+                SnakeHeadBlockVelocity = Velocity(SNAKE_VELOCITY, 0)
+            elif event.key == pygame.K_UP:
+                SnakeHeadBlockVelocity = Velocity(0, -SNAKE_VELOCITY)
+            elif event.key == pygame.K_DOWN:
+                SnakeHeadBlockVelocity = Velocity(0, SNAKE_VELOCITY)
 
     # --- Game logic should go here
+    for i in range(9, 0, -1):
+        lastBlockVelocity = SnakeBlockList[i-1].velocity
+        SnakeBlockList[i].SetVelocity(lastBlockVelocity)
 
+    # 头部速度设置
+    SnakeBlockList[0].SetVelocity(SnakeHeadBlockVelocity)
     # --- Screen-clearing code goes here
 
     # Here, we clear the screen to white. Don't put other drawing commands
@@ -58,8 +78,14 @@ while not done:
 
     # --- Drawing code should go here
     for i in range(10):
+        # 数据
         tempBlcok = SnakeBlockList[i]
-        pygame.draw.rect(screen, WHITE, [tempBlcok.position.x, tempBlcok.position.y, SNAKE_BLOCK_RADIUS, SNAKE_BLOCK_RADIUS])
+        tempPosition = SnakeBlockList[i].position
+        tempVelocity = SnakeBlockList[i].velocity
+        newPosition = Position(tempPosition.x+tempVelocity.vx,tempPosition.y+tempVelocity.vy)
+        SnakeBlockList[i].SetPosition(newPosition)
+        # 画图
+        pygame.draw.rect(screen, WHITE, [newPosition.x+SNAKE_VELOCITY, newPosition.y+SNAKE_VELOCITY, SNAKE_BLOCK_RADIUS, SNAKE_BLOCK_RADIUS])
 
     # Bounce the rectangle if needed
     if rect_y > 450 or rect_y < 0:
