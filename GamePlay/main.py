@@ -17,7 +17,7 @@ rect_y = 50
 rect_change_x = 5
 rect_change_y = 5
 
-SnakeHeadBlockVelocity = Velocity(SNAKE_VELOCITY,0) #头部出事速度向右
+SnakeHeadBlockVelocity = Velocity(SNAKE_VELOCITY*SNAKE_BLOCK_RADIUS,0) #头部出事速度向右
 
 # 初始化数据
 SnakeBlockList = []
@@ -52,13 +52,13 @@ while not done:
         elif event.type == pygame.KEYUP:
             # If it is an arrow key, reset vector back to zero
             if event.key == pygame.K_LEFT:
-                SnakeHeadBlockVelocity = Velocity(-SNAKE_VELOCITY, 0)
+                SnakeHeadBlockVelocity = Velocity(-SNAKE_VELOCITY*SNAKE_BLOCK_RADIUS, 0)
             elif event.key == pygame.K_RIGHT:
-                SnakeHeadBlockVelocity = Velocity(SNAKE_VELOCITY, 0)
+                SnakeHeadBlockVelocity = Velocity(SNAKE_VELOCITY*SNAKE_BLOCK_RADIUS, 0)
             elif event.key == pygame.K_UP:
-                SnakeHeadBlockVelocity = Velocity(0, -SNAKE_VELOCITY)
+                SnakeHeadBlockVelocity = Velocity(0, -SNAKE_VELOCITY*SNAKE_BLOCK_RADIUS)
             elif event.key == pygame.K_DOWN:
-                SnakeHeadBlockVelocity = Velocity(0, SNAKE_VELOCITY)
+                SnakeHeadBlockVelocity = Velocity(0, SNAKE_VELOCITY*SNAKE_BLOCK_RADIUS)
 
     # --- Game logic should go here
     for i in range(9, 0, -1):
@@ -102,7 +102,7 @@ while not done:
     pygame.display.flip()
 
     # --- Limit to 60 frames per second
-    clock.tick(60)
+    clock.tick(2)
 
 # Close the window and quit.
 pygame.quit()
