@@ -5,6 +5,16 @@ from GlobalDef import *
 from Position import *
 from Velocity import *
 
+
+
+def _IsVelocityLegal(oldVelocity,newVelocity):
+        vxSum = oldVelocity.vx+newVelocity.vx
+        vySum = oldVelocity.vy+newVelocity.vy
+        if vxSum == 0 and vxSum == 0 :
+            return False
+        else:
+            return True
+
 # Define some colors
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -18,6 +28,8 @@ rect_change_x = 5
 rect_change_y = 5
 
 SnakeHeadBlockVelocity = Velocity(SNAKE_VELOCITY*SNAKE_BLOCK_RADIUS,0) #头部出事速度向右
+
+
 
 # 初始化数据
 SnakeBlockList = []
@@ -50,15 +62,20 @@ while not done:
             done = True
         # User let up on a key
         elif event.type == pygame.KEYUP:
+            newVelocity = SnakeHeadBlockVelocity
             # If it is an arrow key, reset vector back to zero
             if event.key == pygame.K_LEFT:
-                SnakeHeadBlockVelocity = Velocity(-SNAKE_VELOCITY*SNAKE_BLOCK_RADIUS, 0)
+                newVelocity = Velocity(-SNAKE_VELOCITY*SNAKE_BLOCK_RADIUS, 0)
             elif event.key == pygame.K_RIGHT:
-                SnakeHeadBlockVelocity = Velocity(SNAKE_VELOCITY*SNAKE_BLOCK_RADIUS, 0)
+                newVelocity = Velocity(SNAKE_VELOCITY*SNAKE_BLOCK_RADIUS, 0)
             elif event.key == pygame.K_UP:
-                SnakeHeadBlockVelocity = Velocity(0, -SNAKE_VELOCITY*SNAKE_BLOCK_RADIUS)
+                newVelocity = Velocity(0, -SNAKE_VELOCITY*SNAKE_BLOCK_RADIUS)
             elif event.key == pygame.K_DOWN:
-                SnakeHeadBlockVelocity = Velocity(0, SNAKE_VELOCITY*SNAKE_BLOCK_RADIUS)
+                newVelocity = Velocity(0, SNAKE_VELOCITY*SNAKE_BLOCK_RADIUS)
+
+            isLegal = _IsVelocityLegal(SnakeHeadBlockVelocity, newVelocity)
+            if isLegal:
+                SnakeHeadBlockVelocity = newVelocity
 
     # --- Game logic should go here
     for i in range(9, 0, -1):
