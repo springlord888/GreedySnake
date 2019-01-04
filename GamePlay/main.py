@@ -1,5 +1,6 @@
 
 import pygame
+import random
 from SnakeBlock import *
 from GlobalDef import *
 from Position import *
@@ -15,6 +16,19 @@ def _IsVelocityLegal(oldVelocity,newVelocity):
         else:
             return True
 
+# 判断两个block是否碰撞
+def _IsTwoBlockCollide(blocka,blockb):
+    positionAx = blocka.position.x
+    positionAy = blocka.position.y
+    positionBx = blockb.position.x
+    positionBy = blockb.position.y
+    if (positionBx>(positionAx-SNAKE_BLOCK_RADIUS))\
+            and (positionBx<(positionAx+SNAKE_BLOCK_RADIUS))\
+            and (positionBy>(positionAy-SNAKE_BLOCK_RADIUS))\
+            and (positionBy<(positionAy+SNAKE_BLOCK_RADIUS)):
+        return  True
+    return  False
+
 # Define some colors
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -24,26 +38,47 @@ rect_x = 50
 rect_y = 50
 
 # Speed and direction of rectangle
-rect_change_x = 5
-rect_change_y = 5
 
-SnakeHeadBlockVelocity = Velocity(SNAKE_VELOCITY*SNAKE_BLOCK_RADIUS,0) #头部出事速度向右
+SnakeHeadBlockVelocity = Velocity(SNAKE_VELOCITY*SNAKE_BLOCK_RADIUS,0) #头部初始速度向右
+SnakeInitLength = 20
+ScreenWidth = 700
+ScreenHeight = 500
 
+
+#追加一个block
+def AddOneBlock(blockList):
+    length = len(blockList)
+    finalBlock = blockList[length-1]
+    tempBlcok = SnakeBlock(finalBlock.position, finalBlock.velocity)
+    blockList.append(tempBlcok)
+
+# 随机一个苹果的位置
+def CaculateApplePosition():
+    # todo 不应该与蛇重合
+    x = random.randrange(1, ScreenWidth)
+    y = random.randrange(1, ScreenHeight)
+    pos = Position(x,y)
+    return  pos
 
 
 # 初始化数据
 SnakeBlockList = []
-for i in range(10):
+for i in range(SnakeInitLength):
     position = Position(220-(i*SNAKE_BLOCK_RADIUS),20)
     tempBlcok = SnakeBlock(position,SnakeHeadBlockVelocity)
     SnakeBlockList.append(tempBlcok)
+
+# 苹果
+AppleBlock = SnakeBlock(CaculateApplePosition(),Velocity(0,0))
+
 
 
 
 pygame.init()
 
 # Set the width and height of the screen [width, height]
-size = (700, 500)
+
+size = (ScreenWidth, ScreenHeight)
 screen = pygame.display.set_mode(size)
 
 pygame.display.set_caption("My Game")
@@ -78,12 +113,38 @@ while not done:
                 SnakeHeadBlockVelocity = newVelocity
 
     # --- Game logic should go here
-    for i in range(9, 0, -1):
+    # 除头部外的速度设置
+    for i in range(len(SnakeBlockList)-1, 0, -1):
         lastBlockVelocity = SnakeBlockList[i-1].velocity
         SnakeBlockList[i].SetVelocity(lastBlockVelocity)
 
     # 头部速度设置
     SnakeBlockList[0].SetVelocity(SnakeHeadBlockVelocity)
+
+    #蛇块的位置更新
+    for i in range(len(SnakeBlockList)):
+        tempBlcok = SnakeBlockList[i]
+        tempPosition = SnakeBlockList[i].position
+        tempVelocity = SnakeBlockList[i].velocity
+        newPosition = Position(tempPosition.x+tempVelocity.vx,tempPosition.y+tempVelocity.vy)
+        SnakeBlockList[i].SetPosition(newPosition)
+        #检查头部与身体是否碰撞
+        if  i!= 0 :
+            snakeHeadBlock = SnakeBlockList[0]
+            isCollide = _IsTwoBlockCollide(snakeHeadBlock,tempBlcok)
+            if isCollide :
+                print("头撞到身体了啊啊啊啊啊")
+                done = True
+
+        # 检查蛇头与苹果的碰撞
+        isCollideApple = _IsTwoBlockCollide(SnakeBlockList[0], AppleBlock)
+        if  isCollideApple :
+            print("迟到一颗红苹果")
+            # 更新苹果位置
+            AppleBlock = SnakeBlock(CaculateApplePosition(), Velocity(0, 0))
+            # 增加蛇的长度
+            AddOneBlock(SnakeBlockList)
+
     # --- Screen-clearing code goes here
 
     # Here, we clear the screen to white. Don't put other drawing commands
@@ -94,32 +155,22 @@ while not done:
     screen.fill(BLACK)
 
     # --- Drawing code should go here
-    for i in range(10):
-        # 数据
-        tempBlcok = SnakeBlockList[i]
-        tempPosition = SnakeBlockList[i].position
-        tempVelocity = SnakeBlockList[i].velocity
-        newPosition = Position(tempPosition.x+tempVelocity.vx,tempPosition.y+tempVelocity.vy)
-        SnakeBlockList[i].SetPosition(newPosition)
-        # 画图
-        pygame.draw.rect(screen, WHITE, [newPosition.x+SNAKE_VELOCITY, newPosition.y+SNAKE_VELOCITY, SNAKE_BLOCK_RADIUS, SNAKE_BLOCK_RADIUS])
 
-    # Bounce the rectangle if needed
-    if rect_y > 450 or rect_y < 0:
-        rect_change_y = rect_change_y * -1
-    if rect_x > 650 or rect_x < 0:
-        rect_change_x = rect_change_x * -1
 
-    pygame.draw.rect(screen, WHITE, [rect_x, rect_y, 50, 50])
-    pygame.draw.rect(screen, RED, [rect_x + 10, rect_y + 10, 30, 30])
+    # 画图
+    # snake
+    for i in range(len(SnakeBlockList)):
+        block = SnakeBlockList[i]
+        pygame.draw.rect(screen, WHITE, [block.position.x, block.position.y, SNAKE_BLOCK_RADIUS, SNAKE_BLOCK_RADIUS])
 
-    rect_x += rect_change_x
-    rect_y += rect_change_y
+    # apple
+    pygame.draw.rect(screen, RED, [AppleBlock.position.x, AppleBlock.position.y, SNAKE_BLOCK_RADIUS, SNAKE_BLOCK_RADIUS])
+
     # --- Go ahead and update the screen with what we've drawn.
     pygame.display.flip()
 
     # --- Limit to 60 frames per second
-    clock.tick(2)
+    clock.tick(4)
 
 # Close the window and quit.
 pygame.quit()
