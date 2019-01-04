@@ -40,8 +40,8 @@ rect_y = 50
 # Speed and direction of rectangle
 
 SnakeHeadBlockVelocity = Velocity(SNAKE_VELOCITY*SNAKE_BLOCK_RADIUS,0) #头部初始速度向右
-SnakeInitLength = 20
-ScreenWidth = 700
+SnakeInitLength = 5
+ScreenWidth = 500
 ScreenHeight = 500
 
 
@@ -55,8 +55,8 @@ def AddOneBlock(blockList):
 # 随机一个苹果的位置
 def CaculateApplePosition():
     # todo 不应该与蛇重合
-    x = random.randrange(1, ScreenWidth)
-    y = random.randrange(1, ScreenHeight)
+    x = random.randrange(2*SNAKE_BLOCK_RADIUS, ScreenWidth-2*SNAKE_BLOCK_RADIUS)
+    y = random.randrange(2*SNAKE_BLOCK_RADIUS, ScreenHeight-2*SNAKE_BLOCK_RADIUS)
     pos = Position(x,y)
     return  pos
 
@@ -64,7 +64,7 @@ def CaculateApplePosition():
 # 初始化数据
 SnakeBlockList = []
 for i in range(SnakeInitLength):
-    position = Position(220-(i*SNAKE_BLOCK_RADIUS),20)
+    position = Position(220-(i*SNAKE_BLOCK_RADIUS),100)
     tempBlcok = SnakeBlock(position,SnakeHeadBlockVelocity)
     SnakeBlockList.append(tempBlcok)
 
@@ -136,14 +136,24 @@ while not done:
                 print("头撞到身体了啊啊啊啊啊")
                 done = True
 
-        # 检查蛇头与苹果的碰撞
-        isCollideApple = _IsTwoBlockCollide(SnakeBlockList[0], AppleBlock)
-        if  isCollideApple :
-            print("迟到一颗红苹果")
-            # 更新苹果位置
-            AppleBlock = SnakeBlock(CaculateApplePosition(), Velocity(0, 0))
-            # 增加蛇的长度
-            AddOneBlock(SnakeBlockList)
+    # 检查蛇头与苹果的碰撞
+    isCollideApple = _IsTwoBlockCollide(SnakeBlockList[0], AppleBlock)
+    if  isCollideApple :
+        print("吃到一颗红苹果")
+        # 更新苹果位置
+        AppleBlock = SnakeBlock(CaculateApplePosition(), Velocity(0, 0))
+        # 增加蛇的长度
+        AddOneBlock(SnakeBlockList)
+
+    # 检查蛇头与墙的碰撞(注意蛇头的坐标在左上角)
+    snakeheadPosx = SnakeBlockList[0].position.x
+    snakeheadPosy = SnakeBlockList[0].position.y
+    if snakeheadPosx<=SNAKE_BLOCK_RADIUS\
+        or snakeheadPosx>=(ScreenWidth-2*SNAKE_BLOCK_RADIUS)\
+        or snakeheadPosy<=SNAKE_BLOCK_RADIUS\
+        or snakeheadPosy>=(ScreenHeight - 2*SNAKE_BLOCK_RADIUS):
+        print("大兄弟你撞墙了啊")
+        done = True
 
     # --- Screen-clearing code goes here
 
@@ -166,6 +176,17 @@ while not done:
     # apple
     pygame.draw.rect(screen, RED, [AppleBlock.position.x, AppleBlock.position.y, SNAKE_BLOCK_RADIUS, SNAKE_BLOCK_RADIUS])
 
+    #border
+    """
+    # 一块一块的
+    for i in range(int(ScreenWidth/SNAKE_BLOCK_RADIUS)):
+        pygame.draw.rect(screen, GREEN,[SNAKE_BLOCK_RADIUS*i, 0, SNAKE_BLOCK_RADIUS, SNAKE_BLOCK_RADIUS])
+        pygame.draw.rect(screen, GREEN,[SNAKE_BLOCK_RADIUS*i, ScreenHeight-SNAKE_BLOCK_RADIUS, SNAKE_BLOCK_RADIUS, SNAKE_BLOCK_RADIUS])
+    """
+    pygame.draw.rect(screen, GREEN, [0, 0, ScreenWidth, SNAKE_BLOCK_RADIUS])
+    pygame.draw.rect(screen, GREEN, [0, ScreenHeight-SNAKE_BLOCK_RADIUS, ScreenWidth, SNAKE_BLOCK_RADIUS])
+    pygame.draw.rect(screen, GREEN, [0, 0, SNAKE_BLOCK_RADIUS, ScreenHeight])
+    pygame.draw.rect(screen, GREEN, [ScreenWidth-SNAKE_BLOCK_RADIUS, 0, SNAKE_BLOCK_RADIUS, ScreenHeight])
     # --- Go ahead and update the screen with what we've drawn.
     pygame.display.flip()
 
