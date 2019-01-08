@@ -1,6 +1,7 @@
 
 import pygame
 import random
+import math
 from SnakeBlock import *
 from GlobalDef import *
 from Position import *
@@ -57,6 +58,9 @@ def CaculateApplePosition():
     # todo 不应该与蛇重合
     x = random.randrange(2*SNAKE_BLOCK_RADIUS, ScreenWidth-2*SNAKE_BLOCK_RADIUS)
     y = random.randrange(2*SNAKE_BLOCK_RADIUS, ScreenHeight-2*SNAKE_BLOCK_RADIUS)
+    # todo x 与 y应该是蛇块半径的整数倍，这样可以和蛇头严格对准
+    x = math.floor(x/SNAKE_BLOCK_RADIUS) *SNAKE_BLOCK_RADIUS
+    y = math.floor(y/SNAKE_BLOCK_RADIUS) *SNAKE_BLOCK_RADIUS
     pos = Position(x,y)
     return  pos
 
