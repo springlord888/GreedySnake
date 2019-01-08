@@ -50,7 +50,19 @@ ScreenHeight = 500
 def AddOneBlock(blockList):
     length = len(blockList)
     finalBlock = blockList[length-1]
-    tempBlcok = SnakeBlock(finalBlock.position, finalBlock.velocity)
+    finalBlockVx = finalBlock.velocity.vx
+    finalBlockVy = finalBlock.velocity.vy
+    tempBlcokPos = finalBlock.position
+    if finalBlockVx>0 and finalBlockVy==0 :
+        tempBlcokPos.x = tempBlcokPos.x-SNAKE_BLOCK_RADIUS
+    elif finalBlockVx<0 and finalBlockVy==0 :
+        tempBlcokPos.x = tempBlcokPos.x + SNAKE_BLOCK_RADIUS
+    elif finalBlockVx == 0 and finalBlockVy > 0:
+        tempBlcokPos.y = tempBlcokPos.y + SNAKE_BLOCK_RADIUS
+    elif finalBlockVx == 0 and finalBlockVy < 0:
+        tempBlcokPos.y = tempBlcokPos.y - SNAKE_BLOCK_RADIUS
+
+    tempBlcok = SnakeBlock(tempBlcokPos, finalBlock.velocity)
     blockList.append(tempBlcok)
 
 # 随机一个苹果的位置
@@ -58,7 +70,7 @@ def CaculateApplePosition():
     # todo 不应该与蛇重合
     x = random.randrange(2*SNAKE_BLOCK_RADIUS, ScreenWidth-2*SNAKE_BLOCK_RADIUS)
     y = random.randrange(2*SNAKE_BLOCK_RADIUS, ScreenHeight-2*SNAKE_BLOCK_RADIUS)
-    # todo x 与 y应该是蛇块半径的整数倍，这样可以和蛇头严格对准
+    #  x 与 y应该是蛇块半径的整数倍，这样可以和蛇头严格对准
     x = math.floor(x/SNAKE_BLOCK_RADIUS) *SNAKE_BLOCK_RADIUS
     y = math.floor(y/SNAKE_BLOCK_RADIUS) *SNAKE_BLOCK_RADIUS
     pos = Position(x,y)
