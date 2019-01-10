@@ -35,8 +35,17 @@ BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 GREEN = (0, 255, 0)
 RED = (255, 0, 0)
-rect_x = 50
-rect_y = 50
+BLUE = (0,0,255)
+GREY = (126,126,126)
+
+SnakeBlockColors = []
+SnakeBlockColors.append(WHITE)
+#SnakeBlockColors.append(GREEN)
+#SnakeBlockColors.append(RED)
+SnakeBlockColors.append(BLUE)
+#SnakeBlockColors.append(GREY)
+
+
 
 # Speed and direction of rectangle
 
@@ -160,6 +169,7 @@ while not done:
         AppleBlock = SnakeBlock(CaculateApplePosition(), Velocity(0, 0))
         # 增加蛇的长度
         AddOneBlock(SnakeBlockList)
+        print("蛇长===",len(SnakeBlockList))
 
     # 检查蛇头与墙的碰撞(注意蛇头的坐标在左上角)
     snakeheadPosx = SnakeBlockList[0].position.x
@@ -187,7 +197,8 @@ while not done:
     # snake
     for i in range(len(SnakeBlockList)):
         block = SnakeBlockList[i]
-        pygame.draw.rect(screen, WHITE, [block.position.x, block.position.y, SNAKE_BLOCK_RADIUS, SNAKE_BLOCK_RADIUS])
+        blockColor = SnakeBlockColors[i%(len(SnakeBlockColors))]
+        pygame.draw.rect(screen, blockColor, [block.position.x, block.position.y, SNAKE_BLOCK_RADIUS, SNAKE_BLOCK_RADIUS])
 
     # apple
     pygame.draw.rect(screen, RED, [AppleBlock.position.x, AppleBlock.position.y, SNAKE_BLOCK_RADIUS, SNAKE_BLOCK_RADIUS])
