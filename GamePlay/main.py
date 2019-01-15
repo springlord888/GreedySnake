@@ -43,7 +43,11 @@ SnakeBlockColors.append(WHITE)
 #SnakeBlockColors.append(GREEN)
 #SnakeBlockColors.append(RED)
 SnakeBlockColors.append(BLUE)
-#SnakeBlockColors.append(GREY)
+SnakeBlockColors.append(GREY)
+SnakeBlockColors.append((0,255,255))
+SnakeBlockColors.append((238,173,14))
+SnakeBlockColors.append((160,32,240))
+SnakeBlockColors.append((178,223,238))
 
 
 
@@ -53,6 +57,10 @@ SnakeHeadBlockVelocity = Velocity(SNAKE_VELOCITY*SNAKE_BLOCK_RADIUS,0) #头部�
 SnakeInitLength = 5
 ScreenWidth = 500
 ScreenHeight = 500
+Score = 0
+DeathReason = ''
+IsDead = False
+
 
 
 #追加一个block
@@ -61,17 +69,17 @@ def AddOneBlock(blockList):
     finalBlock = blockList[length-1]
     finalBlockVx = finalBlock.velocity.vx
     finalBlockVy = finalBlock.velocity.vy
-    tempBlcokPos = finalBlock.position
+    tempBlcokPos = Position(finalBlock.position.x,finalBlock.position.y)
     if finalBlockVx>0 and finalBlockVy==0 :
         tempBlcokPos.x = tempBlcokPos.x-SNAKE_BLOCK_RADIUS
     elif finalBlockVx<0 and finalBlockVy==0 :
         tempBlcokPos.x = tempBlcokPos.x + SNAKE_BLOCK_RADIUS
     elif finalBlockVx == 0 and finalBlockVy > 0:
-        tempBlcokPos.y = tempBlcokPos.y + SNAKE_BLOCK_RADIUS
-    elif finalBlockVx == 0 and finalBlockVy < 0:
         tempBlcokPos.y = tempBlcokPos.y - SNAKE_BLOCK_RADIUS
+    elif finalBlockVx == 0 and finalBlockVy < 0:
+        tempBlcokPos.y = tempBlcokPos.y + SNAKE_BLOCK_RADIUS
 
-    tempBlcok = SnakeBlock(tempBlcokPos, finalBlock.velocity)
+    tempBlcok = SnakeBlock(tempBlcokPos, Velocity(finalBlockVx,finalBlockVy))
     blockList.append(tempBlcok)
 
 # 随机一个苹果的位置
@@ -102,11 +110,10 @@ AppleBlock = SnakeBlock(CaculateApplePosition(),Velocity(0,0))
 pygame.init()
 
 # Set the width and height of the screen [width, height]
-
 size = (ScreenWidth, ScreenHeight)
 screen = pygame.display.set_mode(size)
 
-pygame.display.set_caption("My Game")
+pygame.display.set_caption("GreedySnake")
 
 # Loop until the user clicks the close button.
 done = False
@@ -137,7 +144,6 @@ while not done:
             if isLegal:
                 SnakeHeadBlockVelocity = newVelocity
 
-    # --- Game logic should go here
     # 除头部外的速度设置
     for i in range(len(SnakeBlockList)-1, 0, -1):
         lastBlockVelocity = SnakeBlockList[i-1].velocity
@@ -158,18 +164,23 @@ while not done:
             snakeHeadBlock = SnakeBlockList[0]
             isCollide = _IsTwoBlockCollide(snakeHeadBlock,tempBlcok)
             if isCollide :
-                print("头撞到身体了啊啊啊啊啊")
+                #print("头撞到身体了啊啊啊啊啊")
+                DeathReason = 'SNKAE HITS HIMSELF'
+                IsDead = True
                 done = True
+
 
     # 检查蛇头与苹果的碰撞
     isCollideApple = _IsTwoBlockCollide(SnakeBlockList[0], AppleBlock)
     if  isCollideApple :
-        print("吃到一颗红苹果")
+        #print("吃到一颗红苹果")
         # 更新苹果位置
         AppleBlock = SnakeBlock(CaculateApplePosition(), Velocity(0, 0))
         # 增加蛇的长度
         AddOneBlock(SnakeBlockList)
-        print("蛇长===",len(SnakeBlockList))
+        #print("蛇长===",len(SnakeBlockList))
+        # 更新分数
+        Score = Score +1
 
     # 检查蛇头与墙的碰撞(注意蛇头的坐标在左上角)
     snakeheadPosx = SnakeBlockList[0].position.x
@@ -178,26 +189,22 @@ while not done:
         or snakeheadPosx>=(ScreenWidth-2*SNAKE_BLOCK_RADIUS)\
         or snakeheadPosy<=SNAKE_BLOCK_RADIUS\
         or snakeheadPosy>=(ScreenHeight - 2*SNAKE_BLOCK_RADIUS):
-        print("大兄弟你撞墙了啊")
+        # print("大兄弟你撞墙了啊")
+        DeathReason = 'SNKAE HITS THE WALL'
+        IsDead = True
         done = True
 
     # --- Screen-clearing code goes here
-
-    # Here, we clear the screen to white. Don't put other drawing commands
-    # above this, or they will be erased with this command.
-
-    # If you want a background image, replace this clear with blit'ing the
     # background image.
     screen.fill(BLACK)
 
     # --- Drawing code should go here
 
-
     # 画图
     # snake
     for i in range(len(SnakeBlockList)):
         block = SnakeBlockList[i]
-        blockColor = SnakeBlockColors[i%(len(SnakeBlockColors))]
+        blockColor = SnakeBlockColors[i% len(SnakeBlockColors)]
         pygame.draw.rect(screen, blockColor, [block.position.x, block.position.y, SNAKE_BLOCK_RADIUS, SNAKE_BLOCK_RADIUS])
 
     # apple
@@ -214,10 +221,37 @@ while not done:
     pygame.draw.rect(screen, GREEN, [0, ScreenHeight-SNAKE_BLOCK_RADIUS, ScreenWidth, SNAKE_BLOCK_RADIUS])
     pygame.draw.rect(screen, GREEN, [0, 0, SNAKE_BLOCK_RADIUS, ScreenHeight])
     pygame.draw.rect(screen, GREEN, [ScreenWidth-SNAKE_BLOCK_RADIUS, 0, SNAKE_BLOCK_RADIUS, ScreenHeight])
+
+    # 得分显示
+    font = pygame.font.SysFont('Arial', 25, True, False)
+    textScore = font.render("Score:"+str(Score), True, WHITE)
+    screen.blit(textScore, [20, 20])
     # --- Go ahead and update the screen with what we've drawn.
     pygame.display.flip()
 
     # --- Limit to 60 frames per second
+    clock.tick(8)
+
+
+# 显示最后分数并点击后退出游戏
+done2 = False
+# -------- Main Program Loop -----------
+while not done2:
+    # --- Main event loop
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            done2 = True
+    screen.fill(BLACK)
+    font = pygame.font.SysFont('Arial', 30, True, False)
+    textScore = font.render("Final Socre:"+str(Score), True, WHITE)
+    screen.blit(textScore, [180, 180])
+    if IsDead:
+        textReason = font.render("Reason:" + DeathReason, True, RED)
+        screen.blit(textReason, [80, 220])
+
+    # --- Go ahead and update the screen with what we've drawn.
+    pygame.display.flip()
+    # --- Limit to 4 frames per second
     clock.tick(4)
 
 # Close the window and quit.
